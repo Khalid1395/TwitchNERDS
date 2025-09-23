@@ -1,4 +1,0 @@
-# TwitchNERDS
-# TwitchNERDS
-# TwitchNERDS
-# TwitchNERDS
