@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Twitch - Connexion & Inscription</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header avec logo Twitch style -->
+        <header class="header">
+            <div class="logo">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <path d="M8 0L0 8V32H8V40L16 32H24L40 16V0H8ZM36 14.4L28.8 21.6H21.6L16 27.2V21.6H8V4H36V14.4Z" fill="#9146FF"/>
+                    <path d="M30.4 7.2H26.4V16H30.4V7.2Z" fill="#9146FF"/>
+                    <path d="M20.8 7.2H16.8V16H20.8V7.2Z" fill="#9146FF"/>
+                </svg>
+                <h1>Forum Twitch</h1>
+            </div>
+        </header>
+
+        <!-- Conteneur principal -->
+        <main class="main-content">
+            <!-- Formulaire de connexion -->
+            <div class="form-container" id="loginForm">
+                <div class="form-header">
+                    <h2>Se connecter</h2>
+                    <p>Connectez-vous à votre compte pour accéder au forum</p>
+                </div>
+                
+                <form class="auth-form" action="auth.php" method="POST">
+                    <input type="hidden" name="action" value="login">
+                    
+                    <div class="input-group">
+                        <label for="login-email">Email ou nom d'utilisateur</label>
+                        <input type="text" id="login-email" name="email" required>
+                        <span class="error-message" id="login-email-error"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="login-password">Mot de passe</label>
+                        <input type="password" id="login-password" name="password" required>
+                        <span class="error-message" id="login-password-error"></span>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="remember">
+                            <span class="checkmark"></span>
+                            Se souvenir de moi
+                        </label>
+                        <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Se connecter</button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Pas encore de compte ? <a href="#" onclick="showRegisterForm()">Créer un compte</a></p>
+                </div>
+            </div>
+
+            <!-- Formulaire d'inscription -->
+            <div class="form-container hidden" id="registerForm">
+                <div class="form-header">
+                    <h2>Créer un compte</h2>
+                    <p>Rejoignez notre communauté de streamers et gamers</p>
+                </div>
+                
+                <form class="auth-form" action="auth.php" method="POST">
+                    <input type="hidden" name="action" value="register">
+                    
+                    <div class="input-group">
+                        <label for="register-username">Nom d'utilisateur</label>
+                        <input type="text" id="register-username" name="username" required>
+                        <span class="error-message" id="register-username-error"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-email">Adresse email</label>
+                        <input type="email" id="register-email" name="email" required>
+                        <span class="error-message" id="register-email-error"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-password">Mot de passe</label>
+                        <input type="password" id="register-password" name="password" required>
+                        <span class="error-message" id="register-password-error"></span>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="register-confirm-password">Confirmer le mot de passe</label>
+                        <input type="password" id="register-confirm-password" name="confirm_password" required>
+                        <span class="error-message" id="register-confirm-password-error"></span>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" name="terms" required>
+                            <span class="checkmark"></span>
+                            J'accepte les <a href="#" class="terms-link">conditions d'utilisation</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Créer mon compte</button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Déjà un compte ? <a href="#" onclick="showLoginForm()">Se connecter</a></p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Messages de notification -->
+        <div class="notification" id="notification">
+            <span class="notification-text"></span>
+            <button class="notification-close" onclick="hideNotification()">&times;</button>
+        </div>
+    </div>
+
+    <script src="script.js?v=1.0"></script>
+</body>
+</html>
