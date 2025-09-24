@@ -11,7 +11,7 @@ body {
     color: #333;
     background: #f8f9fa;
     min-height: 100vh;
-    padding-top: 80px; /* Compensation pour la navbar fixe */
+    padding-top: 0; /* Pas de padding car la navbar est transparente */
 }
 
 .container {
@@ -51,6 +51,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    position: relative;
 }
 
 .logo i {
@@ -111,6 +112,7 @@ body {
     align-items: center;
     color: white;
     overflow: hidden;
+    padding-top: 100px; /* Espace pour la navbar transparente */
 }
 
 .hero-background {
@@ -614,7 +616,7 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     body {
-        padding-top: 120px; /* Plus d'espace pour la navbar mobile */
+        padding-top: 0; /* Pas de padding car la navbar est transparente */
     }
     
     .header .container {
@@ -825,4 +827,26 @@ html {
 
 .logo-img {
     width: 100px;
+    transition: opacity 0.3s ease;
+}
+
+/* Logo transparent par défaut */
+.logo-transparent {
+    opacity: 1;
+}
+
+.logo-scrolled {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Quand la navbar est scrollée, afficher le logo blanc */
+.header.scrolled .logo-transparent {
+    opacity: 0;
+}
+
+.header.scrolled .logo-scrolled {
+    opacity: 1;
 }
