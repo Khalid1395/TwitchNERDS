@@ -1,3 +1,7 @@
+<?php
+// Inclure la configuration pour gérer les sessions
+require_once 'config.php';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -17,6 +21,27 @@
             <nav class="nav">
                 <a href="#accueil" class="nav-link active">Accueil</a>
                 <a href="#faq" class="nav-link">FAQ</a>
+                <?php
+                // Vérifier si l'utilisateur est connecté
+                // La session est déjà démarrée via config.php
+                
+                if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']) {
+                    // Utilisateur connecté - afficher profil
+                    echo '<div class="nav-profile">';
+                    echo '<a href="dashboard.php" class="nav-link profile-link">';
+                    echo '<i class="fas fa-user-circle"></i>';
+                    echo '<span>' . htmlspecialchars($_SESSION['username']) . '</span>';
+                    echo '</a>';
+                    echo '<div class="profile-dropdown">';
+                    echo '<a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>';
+                    echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>';
+                    echo '</div>';
+                    echo '</div>';
+                } else {
+                    // Utilisateur non connecté - afficher connexion
+                    echo '<a href="login.php" class="nav-link">Connexion</a>';
+                }
+                ?>
             </nav>
         </div>
     </header>

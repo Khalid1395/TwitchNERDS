@@ -1,10 +1,12 @@
-// Variables globales
+// ===== VARIABLES GLOBALES =====
 let currentCategory = 'all';
 let searchResults = [];
 let currentSearchTerm = '';
 let isSearchActive = false;
+let currentForm = 'login';
+let isSubmitting = false;
 
-// Données des questions FAQ
+// ===== DONNÉES FAQ =====
 const faqData = [
     {
         id: 1,
@@ -64,21 +66,30 @@ const faqData = [
     }
 ];
 
-// Initialisation
+// ===== INITIALISATION =====
 document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     initializeFAQ();
     initializeSearch();
+    setupRealTimeValidation();
+    checkUrlParams();
+    preloadResources();
 });
 
-// Initialisation des événements
+// ===== GESTION DES ÉVÉNEMENTS =====
 function initializeEventListeners() {
     // Navigation
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
             const target = this.getAttribute('href');
+            
+            // Si c'est un lien externe (comme login.php), laisser le comportement par défaut
+            if (target.startsWith('http') || target.includes('.php') || target.includes('.html')) {
+                return; // Laisser le comportement par défaut
+            }
+            
+            e.preventDefault();
             scrollToSection(target);
             updateActiveNavLink(this);
         });
@@ -129,9 +140,24 @@ function initializeEventListeners() {
             scrollToSection('#faq');
         });
     }
+
+    // Écouteurs pour les formulaires d'authentification
+    const loginForm = document.querySelector('#loginForm .auth-form');
+    const registerForm = document.querySelector('#registerForm .auth-form');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLoginSubmit);
+    }
+    
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegisterSubmit);
+    }
+    
+    // Gestion des touches
+    document.addEventListener('keydown', handleKeyPress);
 }
 
-// Initialisation de la FAQ
+// ===== FONCTIONS FAQ =====
 function initializeFAQ() {
     // Animation d'apparition des éléments FAQ
     const observer = new IntersectionObserver((entries) => {
@@ -151,60 +177,6 @@ function initializeFAQ() {
     });
 }
 
-// Initialisation de la recherche
-function initializeSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-
-    // Recherche en temps réel
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.trim();
-        if (searchTerm.length > 2) {
-            performSearch(searchTerm);
-        } else if (searchTerm.length === 0) {
-            showAllFAQ();
-        }
-    });
-
-    // Recherche au clic
-    searchBtn.addEventListener('click', function() {
-        const searchTerm = searchInput.value.trim();
-        if (searchTerm) {
-            performSearch(searchTerm);
-        }
-    });
-
-    // Recherche avec Entrée
-    searchInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            const searchTerm = this.value.trim();
-            if (searchTerm) {
-                performSearch(searchTerm);
-            }
-        }
-    });
-}
-
-// Navigation fluide
-function scrollToSection(target) {
-    const section = document.querySelector(target);
-    if (section) {
-        section.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-    }
-}
-
-// Mise à jour du lien de navigation actif
-function updateActiveNavLink(activeLink) {
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    activeLink.classList.add('active');
-}
-
-// Filtrage des FAQ par catégorie
 function filterFAQByCategory(category) {
     currentCategory = category;
     
@@ -228,7 +200,6 @@ function filterFAQByCategory(category) {
     });
 }
 
-// Mise à jour du bouton de catégorie actif
 function updateActiveCategoryBtn(activeBtn) {
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -236,7 +207,6 @@ function updateActiveCategoryBtn(activeBtn) {
     activeBtn.classList.add('active');
 }
 
-// Toggle des éléments FAQ
 function toggleFAQItem(item) {
     const isActive = item.classList.contains('active');
     
@@ -251,7 +221,44 @@ function toggleFAQItem(item) {
     item.classList.toggle('active');
 }
 
-// Recherche dans les FAQ
+// ===== FONCTIONS DE RECHERCHE =====
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    if (!searchInput) return;
+
+    // Recherche en temps réel
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length > 2) {
+            debouncedSearch(searchTerm);
+        } else if (searchTerm.length === 0) {
+            showAllFAQ();
+        }
+    });
+
+    // Recherche au clic
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm) {
+                performSearch(searchTerm);
+            }
+        });
+    }
+
+    // Recherche avec Entrée
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const searchTerm = this.value.trim();
+            if (searchTerm) {
+                performSearch(searchTerm);
+            }
+        }
+    });
+}
+
 function performSearch(searchTerm) {
     currentSearchTerm = searchTerm;
     isSearchActive = true;
@@ -266,10 +273,11 @@ function performSearch(searchTerm) {
     displaySearchResults(results, searchTerm);
 }
 
-// Affichage des résultats de recherche
 function displaySearchResults(results, searchTerm) {
     const faqContainer = document.querySelector('.faq-container');
     const faqItems = document.querySelectorAll('.faq-item');
+    
+    if (!faqContainer) return;
     
     // Masquer tous les éléments
     faqItems.forEach(item => {
@@ -301,7 +309,6 @@ function displaySearchResults(results, searchTerm) {
     updateSearchIndicator(searchTerm);
 }
 
-// Message "Aucun résultat"
 function showNoResultsMessage(searchTerm) {
     const faqContainer = document.querySelector('.faq-container');
     let noResultsMsg = faqContainer.querySelector('.no-results');
@@ -329,7 +336,6 @@ function showNoResultsMessage(searchTerm) {
     noResultsMsg.style.display = 'block';
 }
 
-// Surlignage des termes de recherche
 function highlightSearchTerm(item, searchTerm) {
     const question = item.querySelector('.faq-question h4');
     const answer = item.querySelector('.faq-answer');
@@ -342,7 +348,6 @@ function highlightSearchTerm(item, searchTerm) {
     }
 }
 
-// Fonction de surlignage
 function highlightText(element, searchTerm) {
     const text = element.innerHTML;
     const regex = new RegExp(`(${searchTerm})`, 'gi');
@@ -350,7 +355,6 @@ function highlightText(element, searchTerm) {
     element.innerHTML = highlightedText;
 }
 
-// Afficher toutes les FAQ
 function showAllFAQ() {
     isSearchActive = false;
     currentSearchTerm = '';
@@ -382,9 +386,10 @@ function showAllFAQ() {
     updateSearchIndicator('');
 }
 
-// Mettre à jour l'indicateur de recherche active
 function updateSearchIndicator(searchTerm) {
     const searchContainer = document.querySelector('.search-container');
+    if (!searchContainer) return;
+    
     let searchIndicator = searchContainer.querySelector('.search-indicator');
     
     if (searchTerm && searchTerm.length > 0) {
@@ -416,7 +421,6 @@ function updateSearchIndicator(searchTerm) {
     }
 }
 
-// Fonction pour effacer la recherche
 function clearSearch() {
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
@@ -425,7 +429,489 @@ function clearSearch() {
     showAllFAQ();
 }
 
-// Animation des statistiques
+// ===== FONCTIONS D'AUTHENTIFICATION =====
+function showLoginForm() {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    
+    if (registerForm) {
+        registerForm.classList.add('hidden');
+    }
+    
+    if (loginForm) {
+        loginForm.classList.remove('hidden');
+        currentForm = 'login';
+        
+        // Focus sur le premier champ après l'animation
+        setTimeout(() => {
+            const firstInput = loginForm.querySelector('input[type="text"], input[type="email"]');
+            if (firstInput) firstInput.focus();
+        }, 300);
+    }
+}
+
+function showRegisterForm() {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    
+    if (loginForm) {
+        loginForm.classList.add('hidden');
+    }
+    
+    if (registerForm) {
+        registerForm.classList.remove('hidden');
+        currentForm = 'register';
+        
+        // Focus sur le premier champ après l'animation
+        setTimeout(() => {
+            const firstInput = registerForm.querySelector('input[type="text"]');
+            if (firstInput) firstInput.focus();
+        }, 300);
+    }
+}
+
+async function handleLoginSubmit(event) {
+    event.preventDefault();
+    
+    if (isSubmitting) return;
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const email = formData.get('email');
+    const password = formData.get('password');
+    
+    // Validation côté client
+    if (!validateLoginForm(email, password)) {
+        return;
+    }
+    
+    // Désactiver le bouton et afficher le chargement
+    setSubmitState(form, true);
+    
+    try {
+        const response = await fetch('auth.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Connexion réussie ! Redirection...', 'success');
+            
+            // Mettre à jour le menu de navigation
+            updateNavigationMenu(result.data?.username || 'Utilisateur');
+            
+            // Garder l'état de chargement pendant la redirection
+            setTimeout(() => {
+                window.location.href = (result.data && result.data.redirect) || 'dashboard.php';
+            }, 1500);
+        } else {
+            showNotification(result.message || 'Erreur de connexion', 'error');
+            setSubmitState(form, false);
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('Erreur de connexion au serveur', 'error');
+        setSubmitState(form, false);
+    }
+}
+
+async function handleRegisterSubmit(event) {
+    event.preventDefault();
+    
+    if (isSubmitting) return;
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const username = formData.get('username');
+    const email = formData.get('email');
+    const password = formData.get('password');
+    const confirmPassword = formData.get('confirm_password');
+    
+    // Validation côté client
+    if (!validateRegisterForm(username, email, password, confirmPassword)) {
+        return;
+    }
+    
+    // Désactiver le bouton et afficher le chargement
+    setSubmitState(form, true);
+    
+    try {
+        const response = await fetch('auth.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('Compte créé avec succès ! Redirection en cours...', 'success');
+            
+            // Redirection si spécifiée
+            if (result.data && result.data.redirect) {
+                setTimeout(() => {
+                    window.location.href = result.data.redirect;
+                }, 1500);
+            } else {
+                // Sinon, basculer vers le formulaire de connexion
+                setTimeout(() => {
+                    showLoginForm();
+                    // Pré-remplir l'email
+                    const emailInput = document.getElementById('login-email');
+                    if (emailInput) emailInput.value = email;
+                }, 2000);
+            }
+        } else {
+            showNotification(result.message || 'Erreur lors de la création du compte', 'error');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('Erreur de connexion au serveur', 'error');
+    } finally {
+        setSubmitState(form, false);
+    }
+}
+
+// ===== VALIDATION DES FORMULAIRES =====
+function validateLoginForm(email, password) {
+    let isValid = true;
+    
+    // Validation email
+    if (!email || email.trim() === '') {
+        showFieldError('login-email', 'L\'email ou nom d\'utilisateur est requis');
+        isValid = false;
+    } else {
+        hideFieldError('login-email');
+    }
+    
+    // Validation mot de passe
+    if (!password || password.length < 6) {
+        showFieldError('login-password', 'Le mot de passe doit contenir au moins 6 caractères');
+        isValid = false;
+    } else {
+        hideFieldError('login-password');
+    }
+    
+    return isValid;
+}
+
+function validateRegisterForm(username, email, password, confirmPassword) {
+    let isValid = true;
+    
+    // Validation nom d'utilisateur
+    if (!username || username.trim().length < 3) {
+        showFieldError('register-username', 'Le nom d\'utilisateur doit contenir au moins 3 caractères');
+        isValid = false;
+    } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        showFieldError('register-username', 'Le nom d\'utilisateur ne peut contenir que des lettres, chiffres et underscores');
+        isValid = false;
+    } else {
+        hideFieldError('register-username');
+    }
+    
+    // Validation email
+    if (!email || !isValidEmail(email)) {
+        showFieldError('register-email', 'Veuillez entrer une adresse email valide');
+        isValid = false;
+    } else {
+        hideFieldError('register-email');
+    }
+    
+    // Validation mot de passe
+    if (!password || password.length < 8) {
+        showFieldError('register-password', 'Le mot de passe doit contenir au moins 8 caractères');
+        isValid = false;
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+        showFieldError('register-password', 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre');
+        isValid = false;
+    } else {
+        hideFieldError('register-password');
+    }
+    
+    // Validation confirmation mot de passe
+    if (password !== confirmPassword) {
+        showFieldError('register-confirm-password', 'Les mots de passe ne correspondent pas');
+        isValid = false;
+    } else {
+        hideFieldError('register-confirm-password');
+    }
+    
+    return isValid;
+}
+
+function setupRealTimeValidation() {
+    // Validation email en temps réel
+    const emailInputs = document.querySelectorAll('input[type="email"], #login-email');
+    emailInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !isValidEmail(this.value)) {
+                showFieldError(this.id, 'Format d\'email invalide');
+            } else {
+                hideFieldError(this.id);
+            }
+        });
+    });
+    
+    // Validation mot de passe en temps réel
+    const passwordInput = document.getElementById('register-password');
+    const confirmPasswordInput = document.getElementById('register-confirm-password');
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            if (password.length > 0 && password.length < 8) {
+                showFieldError(this.id, 'Au moins 8 caractères requis');
+            } else {
+                hideFieldError(this.id);
+            }
+            
+            // Vérifier la confirmation si elle existe
+            if (confirmPasswordInput && confirmPasswordInput.value) {
+                if (password !== confirmPasswordInput.value) {
+                    showFieldError('register-confirm-password', 'Les mots de passe ne correspondent pas');
+                } else {
+                    hideFieldError('register-confirm-password');
+                }
+            }
+        });
+    }
+    
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            const password = passwordInput ? passwordInput.value : '';
+            if (this.value && this.value !== password) {
+                showFieldError(this.id, 'Les mots de passe ne correspondent pas');
+            } else {
+                hideFieldError(this.id);
+            }
+        });
+    }
+    
+    // Validation nom d'utilisateur
+    const usernameInput = document.getElementById('register-username');
+    if (usernameInput) {
+        usernameInput.addEventListener('input', function() {
+            const username = this.value;
+            if (username.length > 0 && username.length < 3) {
+                showFieldError(this.id, 'Au moins 3 caractères requis');
+            } else if (username && !/^[a-zA-Z0-9_]+$/.test(username)) {
+                showFieldError(this.id, 'Seuls les lettres, chiffres et _ sont autorisés');
+            } else {
+                hideFieldError(this.id);
+            }
+        });
+    }
+}
+
+// ===== UTILITAIRES =====
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function showFieldError(fieldId, message) {
+    const errorElement = document.getElementById(fieldId + '-error');
+    const inputElement = document.getElementById(fieldId);
+    
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.add('show');
+    }
+    
+    if (inputElement) {
+        inputElement.style.borderColor = 'var(--twitch-error)';
+    }
+}
+
+function hideFieldError(fieldId) {
+    const errorElement = document.getElementById(fieldId + '-error');
+    const inputElement = document.getElementById(fieldId);
+    
+    if (errorElement) {
+        errorElement.classList.remove('show');
+    }
+    
+    if (inputElement) {
+        inputElement.style.borderColor = '';
+    }
+}
+
+function setSubmitState(form, isSubmitting) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    const inputs = form.querySelectorAll('input');
+    const originalText = submitButton.textContent;
+    
+    if (isSubmitting) {
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion en cours...';
+        submitButton.classList.add('loading');
+        
+        // Ajouter un overlay de chargement sur le formulaire
+        const formContainer = form.closest('.form-container');
+        if (formContainer && !formContainer.querySelector('.loading-overlay')) {
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = '<div class="loading-content"><i class="fas fa-spinner fa-spin"></i><p>Vérification en cours...</p></div>';
+            formContainer.appendChild(overlay);
+        }
+        
+        inputs.forEach(input => {
+            input.disabled = true;
+            input.style.opacity = '0.6';
+        });
+        
+        // Désactiver les liens de navigation
+        const formFooter = form.querySelector('.form-footer');
+        if (formFooter) {
+            const links = formFooter.querySelectorAll('a');
+            links.forEach(link => {
+                link.style.pointerEvents = 'none';
+                link.style.opacity = '0.5';
+            });
+        }
+    } else {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+        submitButton.classList.remove('loading');
+        
+        // Supprimer l'overlay de chargement
+        const formContainer = form.closest('.form-container');
+        if (formContainer) {
+            const overlay = formContainer.querySelector('.loading-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+        
+        inputs.forEach(input => {
+            input.disabled = false;
+            input.style.opacity = '1';
+        });
+        
+        // Réactiver les liens de navigation
+        const formFooter = form.querySelector('.form-footer');
+        if (formFooter) {
+            const links = formFooter.querySelectorAll('a');
+            links.forEach(link => {
+                link.style.pointerEvents = 'auto';
+                link.style.opacity = '1';
+            });
+        }
+    }
+    
+    window.isSubmitting = isSubmitting;
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    if (!notification) return;
+    
+    const notificationText = notification.querySelector('.notification-text');
+    
+    notificationText.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.classList.add('show');
+    
+    // Auto-hide après 5 secondes
+    setTimeout(() => {
+        hideNotification();
+    }, 5000);
+}
+
+function hideNotification() {
+    const notification = document.getElementById('notification');
+    if (notification) {
+        notification.classList.remove('show');
+    }
+}
+
+function handleKeyPress(event) {
+    // Échapper pour fermer les notifications
+    if (event.key === 'Escape') {
+        hideNotification();
+    }
+    
+    // Entrée pour soumettre le formulaire visible
+    if (event.key === 'Enter' && event.target.tagName !== 'BUTTON') {
+        const visibleForm = document.querySelector('.form-container:not(.hidden) .auth-form');
+        if (visibleForm && !isSubmitting) {
+            const submitButton = visibleForm.querySelector('button[type="submit"]');
+            if (submitButton && !submitButton.disabled) {
+                submitButton.click();
+            }
+        }
+    }
+}
+
+function checkUrlParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    const message = urlParams.get('message');
+    const type = urlParams.get('type');
+    
+    if (action === 'register') {
+        showRegisterForm();
+    }
+    
+    if (message) {
+        showNotification(decodeURIComponent(message), type || 'info');
+        // Nettoyer l'URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
+
+function updateNavigationMenu(username) {
+    const nav = document.querySelector('.nav');
+    if (!nav) return;
+    
+    // Chercher le lien de connexion existant
+    const loginLink = nav.querySelector('a[href="login.php"]');
+    if (loginLink) {
+        // Remplacer par le menu profil
+        const profileMenu = `
+            <div class="nav-profile">
+                <a href="dashboard.php" class="nav-link profile-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span>${username}</span>
+                </a>
+                <div class="profile-dropdown">
+                    <a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+                </div>
+            </div>
+        `;
+        loginLink.outerHTML = profileMenu;
+    }
+}
+
+function preloadResources() {
+    // Précharger les images ou autres ressources si nécessaire
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = 'dashboard.php';
+    document.head.appendChild(link);
+}
+
+// ===== FONCTIONS DE NAVIGATION =====
+function scrollToSection(target) {
+    const section = document.querySelector(target);
+    if (section) {
+        section.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+function updateActiveNavLink(activeLink) {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    activeLink.classList.add('active');
+}
+
+// ===== ANIMATIONS =====
 function animateStats() {
     const stats = document.querySelectorAll('.stat-number');
     
@@ -464,7 +950,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Gestion du scroll pour la navigation et la navbar
+// ===== GESTION DU SCROLL =====
 window.addEventListener('scroll', function() {
     const header = document.querySelector('.header');
     const sections = document.querySelectorAll('section[id]');
@@ -495,7 +981,7 @@ window.addEventListener('scroll', function() {
     });
 });
 
-// Fonction utilitaire pour le debounce
+// ===== FONCTIONS UTILITAIRES =====
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
