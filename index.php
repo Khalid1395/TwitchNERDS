@@ -11,7 +11,8 @@
     <header class="header">
         <div class="container">
             <div class="logo">
-                <img src="assets/upload/logo.png" alt="Twitch Nerd" class="logo-img">
+                <img src="assets/upload/logo_b.png" alt="Twitch Nerd" class="logo-img logo-transparent">
+                <img src="assets/upload/logo.png" alt="Twitch Nerd" class="logo-img logo-scrolled">
             </div>
             <nav class="nav">
                 <a href="#accueil" class="nav-link active">Accueil</a>
