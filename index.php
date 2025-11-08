@@ -37,6 +37,8 @@ require_once 'config.php';
                     echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>';
                     echo '</div>';
                     echo '</div>';
+                    // Données utilisateur pour JavaScript
+                    echo '<script>window.currentUser = { id: ' . $_SESSION['user_id'] . ', role: "' . htmlspecialchars($_SESSION['role'] ?? 'user') . '" };</script>';
                 } else {
                     // Utilisateur non connecté - afficher connexion
                     echo '<a href="login.php" class="nav-link">Connexion</a>';
@@ -134,21 +136,13 @@ require_once 'config.php';
                     <div class="search-box">
                         <input type="text" id="searchInput" placeholder="Tapez votre question ici...">
                         <button id="searchBtn"><i class="fas fa-search"></i></button>
-                    </div>
-                    <div class="search-suggestions">
-                        <span class="suggestion-tag" data-search="streaming">Streaming</span>
-                        <span class="suggestion-tag" data-search="obs">OBS</span>
-                        <span class="suggestion-tag" data-search="chat">Chat</span>
-                        <span class="suggestion-tag" data-search="monetisation">Monétisation</span>
-                        <span class="suggestion-tag" data-search="partenariat">Partenariat</span>
-                    </div>
+            </div>
                 </div>
             </div>
         </section>
 
         <section id="faq" class="faq-section">
             <div class="container">
-                <h3>Questions Fréquemment Posées</h3>
                 <div class="faq-categories">
                     <button class="category-btn active" data-category="all">Toutes</button>
                     <button class="category-btn" data-category="streaming">Streaming</button>
@@ -158,141 +152,9 @@ require_once 'config.php';
                 </div>
 
                 <div class="faq-container">
-                    <div class="faq-item" data-category="streaming">
-                        <div class="faq-question">
-                            <h4>Comment commencer à streamer sur Twitch ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Pour commencer à streamer sur Twitch :</p>
-                            <ol>
-                                <li>Créez un compte Twitch</li>
-                                <li>Téléchargez OBS Studio (gratuit)</li>
-                                <li>Configurez votre stream key dans OBS</li>
-                                <li>Choisissez votre jeu ou contenu</li>
-                                <li>Lancez votre premier stream !</li>
-                            </ol>
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-category="technical">
-                        <div class="faq-question">
-                            <h4>Quels sont les meilleurs paramètres OBS pour débuter ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Paramètres recommandés pour débuter :</p>
-                            <ul>
-                                <li><strong>Résolution :</strong> 1920x1080 ou 1280x720</li>
-                                <li><strong>FPS :</strong> 30 ou 60 selon votre connexion</li>
-                                <li><strong>Bitrate :</strong> 2500-6000 kbps</li>
-                                <li><strong>Encoder :</strong> x264 ou NVENC si vous avez une carte NVIDIA</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-category="monetisation">
-                        <div class="faq-question">
-                            <h4>Comment devenir partenaire Twitch ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Critères pour devenir partenaire :</p>
-                            <ul>
-                                <li>Streamer au moins 25 heures sur 30 jours</li>
-                                <li>Streamer sur au moins 12 jours différents</li>
-                                <li>Avoir une moyenne de 75 viewers</li>
-                                <li>Respecter les conditions d'utilisation</li>
-                                <li>Être en conformité avec les directives communautaires</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-category="streaming">
-                        <div class="faq-question">
-                            <h4>Comment améliorer la qualité de mon stream ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Conseils pour améliorer votre stream :</p>
-                            <ul>
-                                <li>Investissez dans un bon microphone</li>
-                                <li>Éclairez bien votre visage</li>
-                                <li>Créez des overlays attrayants</li>
-                                <li>Interagissez avec votre chat</li>
-                                <li>Streamer régulièrement</li>
-                                <li>Partagez vos streams sur les réseaux sociaux</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-category="technical">
-                        <div class="faq-question">
-                            <h4>Mon stream lag, que faire ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Solutions pour réduire le lag :</p>
-                            <ul>
-                                <li>Vérifiez votre connexion internet (upload minimum 3 Mbps)</li>
-                                <li>Fermez les applications inutiles</li>
-                                <li>Réduisez la résolution ou le FPS</li>
-                                <li>Changez de serveur Twitch</li>
-                                <li>Utilisez un encodeur matériel (NVENC/QuickSync)</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-category="community">
-                        <div class="faq-question">
-                            <h4>Comment créer une communauté engagée ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Stratégies pour développer votre communauté :</p>
-                            <ul>
-                                <li>Soyez authentique et vous-même</li>
-                                <li>Répondez aux messages du chat</li>
-                                <li>Créez des événements réguliers</li>
-                                <li>Utilisez Discord pour rester connecté</li>
-                                <li>Collaborez avec d'autres streamers</li>
-                                <li>Créez du contenu unique</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-category="monetisation">
-                        <div class="faq-question">
-                            <h4>Comment gagner de l'argent en streamant ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Moyens de monétiser votre stream :</p>
-                            <ul>
-                                <li><strong>Abonnements :</strong> Revenus mensuels récurrents</li>
-                                <li><strong>Bits :</strong> Pourboires virtuels</li>
-                                <li><strong>Donations :</strong> Via PayPal ou autres plateformes</li>
-                                <li><strong>Partenariats :</strong> Sponsors et collaborations</li>
-                                <li><strong>Ventes :</strong> Merchandising et produits</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="faq-item" data-category="technical">
-                        <div class="faq-question">
-                            <h4>Quel équipement recommandez-vous pour débuter ?</h4>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="faq-answer">
-                            <p>Équipement essentiel pour débuter :</p>
-                            <ul>
-                                <li><strong>Microphone :</strong> Blue Yeti ou Audio-Technica AT2020</li>
-                                <li><strong>Webcam :</strong> Logitech C920 ou C922</li>
-                                <li><strong>Éclairage :</strong> Anneau lumineux LED</li>
-                                <li><strong>PC :</strong> Processeur quad-core minimum</li>
-                                <li><strong>Internet :</strong> Connexion stable avec bon upload</li>
-                            </ul>
-                        </div>
+                    <div class="faq-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Chargement des questions...</p>
                     </div>
                 </div>
             </div>

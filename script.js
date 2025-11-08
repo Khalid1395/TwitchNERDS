@@ -7,68 +7,12 @@ let currentForm = 'login';
 let isSubmitting = false;
 
 // ===== DONNÉES FAQ =====
-const faqData = [
-    {
-        id: 1,
-        category: 'streaming',
-        question: 'Comment commencer à streamer sur Twitch ?',
-        answer: 'Pour commencer à streamer sur Twitch : Créez un compte Twitch, Téléchargez OBS Studio (gratuit), Configurez votre stream key dans OBS, Choisissez votre jeu ou contenu, Lancez votre premier stream !',
-        keywords: ['commencer', 'streamer', 'twitch', 'obs', 'premier', 'stream']
-    },
-    {
-        id: 2,
-        category: 'technical',
-        question: 'Quels sont les meilleurs paramètres OBS pour débuter ?',
-        answer: 'Paramètres recommandés pour débuter : Résolution 1920x1080 ou 1280x720, FPS 30 ou 60 selon votre connexion, Bitrate 2500-6000 kbps, Encoder x264 ou NVENC si vous avez une carte NVIDIA',
-        keywords: ['obs', 'paramètres', 'résolution', 'fps', 'bitrate', 'encoder', 'nvenc']
-    },
-    {
-        id: 3,
-        category: 'monetisation',
-        question: 'Comment devenir partenaire Twitch ?',
-        answer: 'Critères pour devenir partenaire : Streamer au moins 25 heures sur 30 jours, Streamer sur au moins 12 jours différents, Avoir une moyenne de 75 viewers, Respecter les conditions d\'utilisation, Être en conformité avec les directives communautaires',
-        keywords: ['partenaire', 'twitch', 'critères', 'viewers', 'heures', 'stream']
-    },
-    {
-        id: 4,
-        category: 'streaming',
-        question: 'Comment améliorer la qualité de mon stream ?',
-        answer: 'Conseils pour améliorer votre stream : Investissez dans un bon microphone, Éclairez bien votre visage, Créez des overlays attrayants, Interagissez avec votre chat, Streamer régulièrement, Partagez vos streams sur les réseaux sociaux',
-        keywords: ['qualité', 'stream', 'microphone', 'éclairage', 'overlay', 'chat', 'réseaux sociaux']
-    },
-    {
-        id: 5,
-        category: 'technical',
-        question: 'Mon stream lag, que faire ?',
-        answer: 'Solutions pour réduire le lag : Vérifiez votre connexion internet (upload minimum 3 Mbps), Fermez les applications inutiles, Réduisez la résolution ou le FPS, Changez de serveur Twitch, Utilisez un encodeur matériel (NVENC/QuickSync)',
-        keywords: ['lag', 'stream', 'connexion', 'internet', 'résolution', 'fps', 'serveur', 'encodeur']
-    },
-    {
-        id: 6,
-        category: 'community',
-        question: 'Comment créer une communauté engagée ?',
-        answer: 'Stratégies pour développer votre communauté : Soyez authentique et vous-même, Répondez aux messages du chat, Créez des événements réguliers, Utilisez Discord pour rester connecté, Collaborez avec d\'autres streamers, Créez du contenu unique',
-        keywords: ['communauté', 'engagée', 'authentique', 'chat', 'discord', 'collaboration', 'contenu']
-    },
-    {
-        id: 7,
-        category: 'monetisation',
-        question: 'Comment gagner de l\'argent en streamant ?',
-        answer: 'Moyens de monétiser votre stream : Abonnements revenus mensuels récurrents, Bits pourboires virtuels, Donations via PayPal ou autres plateformes, Partenariats sponsors et collaborations, Ventes merchandising et produits',
-        keywords: ['argent', 'streamer', 'abonnements', 'bits', 'donations', 'partenariats', 'merchandising']
-    },
-    {
-        id: 8,
-        category: 'technical',
-        question: 'Quel équipement recommandez-vous pour débuter ?',
-        answer: 'Équipement essentiel pour débuter : Microphone Blue Yeti ou Audio-Technica AT2020, Webcam Logitech C920 ou C922, Éclairage Anneau lumineux LED, PC Processeur quad-core minimum, Internet Connexion stable avec bon upload',
-        keywords: ['équipement', 'microphone', 'webcam', 'éclairage', 'pc', 'internet', 'débuter']
-    }
-];
+let faqData = []; // Sera chargé depuis la base de données
 
 // ===== INITIALISATION =====
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     initializeEventListeners();
+    await loadFAQsFromDatabase();
     initializeFAQ();
     initializeSearch();
     setupRealTimeValidation();
@@ -158,7 +102,147 @@ function initializeEventListeners() {
 }
 
 // ===== FONCTIONS FAQ =====
-function initializeFAQ() {
+async function loadFAQsFromDatabase() {
+    try {
+        const response = await fetch('faq_api.php?action=get_all');
+        const result = await response.json();
+        
+        if (result.success) {
+            faqData = result.faqs;
+            displayFAQs(faqData);
+        } else {
+            console.error('Erreur lors du chargement des FAQ:', result.message);
+            showFAQError();
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des FAQ:', error);
+        showFAQError();
+    }
+}
+
+function displayFAQs(faqs) {
+    const container = document.querySelector('.faq-container');
+    if (!container) return;
+    
+    // Supprimer le message de chargement
+    container.innerHTML = '';
+    
+    // Générer le HTML pour chaque FAQ
+    faqs.forEach(faq => {
+        const faqItem = createFAQItem(faq);
+        container.appendChild(faqItem);
+    });
+    
+    // Réinitialiser les event listeners pour les nouvelles FAQ
+    initializeFAQEventListeners();
+}
+
+function createFAQItem(faq) {
+    const div = document.createElement('div');
+    div.className = 'faq-item';
+    div.setAttribute('data-category', faq.category);
+    div.setAttribute('data-faq-id', faq.id);
+    
+    // Formater la réponse (convertir les listes si nécessaire)
+    const formattedAnswer = formatFAQAnswer(faq.answer);
+    
+    div.innerHTML = `
+        <div class="faq-question">
+            <h4>${escapeHtml(faq.question)}</h4>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="faq-answer">
+            ${formattedAnswer}
+        </div>
+        <div class="faq-discussion"></div>
+    `;
+    
+    return div;
+}
+
+function formatFAQAnswer(answer) {
+    if (!answer) return '<p></p>';
+    
+    // Échapper le HTML d'abord
+    let text = escapeHtml(answer);
+    
+    // Détecter les listes avec des tirets ou des puces
+    // Format: "Mot1, Mot2, Mot3" ou "Item1, Item2"
+    // Si le texte contient beaucoup de virgules, c'est probablement une liste
+    const parts = text.split(/[,\s]+/);
+    
+    // Si le texte contient des patterns de liste (commençant par des mots-clés)
+    // Format simple: séparer par virgules et créer des <li>
+    if (text.includes(',') && !text.includes('.')) {
+        const items = text.split(',').map(item => item.trim()).filter(item => item);
+        if (items.length > 1) {
+            const listItems = items.map(item => `<li>${item}</li>`).join('');
+            return `<ul>${listItems}</ul>`;
+        }
+    }
+    
+    // Détecter les listes avec des numéros
+    const numberedListPattern = /(\d+\.\s+[^,]+(?:,\s+[^,]+)*)/g;
+    if (numberedListPattern.test(text)) {
+        text = text.replace(numberedListPattern, function(match) {
+            const items = match.split(',').map(item => {
+                const cleaned = item.replace(/^\d+\.\s+/, '').trim();
+                return `<li>${cleaned}</li>`;
+            }).join('');
+            return `<ol>${items}</ol>`;
+        });
+    }
+    
+    // Détecter les listes avec tirets ou puces
+    const bulletListPattern = /([-•]\s+[^,]+(?:,\s+[^,]+)*)/g;
+    if (bulletListPattern.test(text)) {
+        text = text.replace(bulletListPattern, function(match) {
+            const items = match.split(',').map(item => {
+                const cleaned = item.replace(/^[-•]\s+/, '').trim();
+                return `<li>${cleaned}</li>`;
+            }).join('');
+            return `<ul>${items}</ul>`;
+        });
+    }
+    
+    // Si c'est une simple liste séparée par des virgules (sans formatage spécial)
+    // Créer une liste à puces
+    if (text.includes(',') && text.split(',').length > 2) {
+        const items = text.split(',').map(item => item.trim()).filter(item => item);
+        if (items.length > 2) {
+            const listItems = items.map(item => `<li>${item}</li>`).join('');
+            return `<ul>${listItems}</ul>`;
+        }
+    }
+    
+    // Sinon, retourner comme paragraphe simple
+    return `<p>${text}</p>`;
+}
+
+function showFAQError() {
+    const container = document.querySelector('.faq-container');
+    if (container) {
+        container.innerHTML = `
+            <div class="faq-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Erreur lors du chargement des questions. Veuillez réessayer plus tard.</p>
+            </div>
+        `;
+    }
+}
+
+function initializeFAQEventListeners() {
+    // Questions FAQ
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        if (question) {
+            question.addEventListener('click', function() {
+                toggleFAQItem(item);
+            });
+        }
+    });
+    
     // Animation d'apparition des éléments FAQ
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -169,7 +253,7 @@ function initializeFAQ() {
         });
     });
 
-    document.querySelectorAll('.faq-item').forEach(item => {
+    faqItems.forEach(item => {
         item.style.opacity = '0';
         item.style.transform = 'translateY(30px)';
         item.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
@@ -177,7 +261,12 @@ function initializeFAQ() {
     });
 }
 
-function filterFAQByCategory(category) {
+function initializeFAQ() {
+    // Cette fonction est maintenant appelée après le chargement des FAQ
+    // Les animations sont gérées dans initializeFAQEventListeners
+}
+
+async function filterFAQByCategory(category) {
     currentCategory = category;
     
     // Si une recherche est active, on ne filtre pas par catégorie
@@ -186,18 +275,21 @@ function filterFAQByCategory(category) {
         return;
     }
     
-    const faqItems = document.querySelectorAll('.faq-item');
-    
-    faqItems.forEach(item => {
-        const itemCategory = item.getAttribute('data-category');
+    // Recharger les FAQ avec la catégorie sélectionnée
+    try {
+        const url = category === 'all' 
+            ? 'faq_api.php?action=get_all'
+            : `faq_api.php?action=get_all&category=${category}`;
         
-        if (category === 'all' || itemCategory === category) {
-            item.style.display = 'block';
-            item.style.animation = 'fadeInUp 0.6s ease forwards';
-        } else {
-            item.style.display = 'none';
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.success) {
+            displayFAQs(result.faqs);
         }
-    });
+    } catch (error) {
+        console.error('Erreur lors du filtrage:', error);
+    }
 }
 
 function updateActiveCategoryBtn(activeBtn) {
@@ -219,6 +311,14 @@ function toggleFAQItem(item) {
     
     // Toggle l'élément actuel
     item.classList.toggle('active');
+    
+    // Si l'élément est ouvert, charger les commentaires
+    if (!isActive) {
+        const faqId = item.getAttribute('data-faq-id');
+        if (faqId) {
+            loadFAQDiscussion(faqId, item);
+        }
+    }
 }
 
 // ===== FONCTIONS DE RECHERCHE =====
@@ -265,9 +365,10 @@ function performSearch(searchTerm) {
     
     const results = faqData.filter(item => {
         const searchLower = searchTerm.toLowerCase();
+        const keywords = Array.isArray(item.keywords) ? item.keywords : (item.keywords || '').split(',');
         return item.question.toLowerCase().includes(searchLower) ||
                item.answer.toLowerCase().includes(searchLower) ||
-               item.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
+               keywords.some(keyword => keyword.trim().toLowerCase().includes(searchLower));
     });
 
     displaySearchResults(results, searchTerm);
@@ -275,30 +376,20 @@ function performSearch(searchTerm) {
 
 function displaySearchResults(results, searchTerm) {
     const faqContainer = document.querySelector('.faq-container');
-    const faqItems = document.querySelectorAll('.faq-item');
     
     if (!faqContainer) return;
-    
-    // Masquer tous les éléments
-    faqItems.forEach(item => {
-        item.style.display = 'none';
-    });
     
     if (results.length === 0) {
         // Afficher message "Aucun résultat"
         showNoResultsMessage(searchTerm);
     } else {
-        // Afficher les résultats
-        results.forEach(result => {
-            // Trouver l'élément FAQ correspondant par son contenu
-            const faqItems = document.querySelectorAll('.faq-item');
-            faqItems.forEach(item => {
-                const questionText = item.querySelector('.faq-question h4').textContent.toLowerCase();
-                if (questionText.includes(result.question.toLowerCase())) {
-                    item.style.display = 'block';
-                    highlightSearchTerm(item, searchTerm);
-                }
-            });
+        // Afficher les résultats en recréant les éléments FAQ
+        displayFAQs(results);
+        
+        // Mettre en surbrillance les termes de recherche
+        const faqItems = document.querySelectorAll('.faq-item');
+        faqItems.forEach(item => {
+            highlightSearchTerm(item, searchTerm);
         });
         
         // Scroll vers la section FAQ
@@ -355,11 +446,10 @@ function highlightText(element, searchTerm) {
     element.innerHTML = highlightedText;
 }
 
-function showAllFAQ() {
+async function showAllFAQ() {
     isSearchActive = false;
     currentSearchTerm = '';
     
-    const faqItems = document.querySelectorAll('.faq-item');
     const noResultsMsg = document.querySelector('.no-results');
     
     if (noResultsMsg) {
@@ -367,20 +457,7 @@ function showAllFAQ() {
     }
     
     // Appliquer le filtre de catégorie actuel
-    filterFAQByCategory(currentCategory);
-    
-    // Retirer le surlignage
-    faqItems.forEach(item => {
-        const question = item.querySelector('.faq-question h4');
-        const answer = item.querySelector('.faq-answer');
-        
-        if (question) {
-            question.innerHTML = question.textContent;
-        }
-        if (answer) {
-            answer.innerHTML = answer.innerHTML.replace(/<mark[^>]*>(.*?)<\/mark>/gi, '$1');
-        }
-    });
+    await filterFAQByCategory(currentCategory);
     
     // Mettre à jour l'indicateur de recherche
     updateSearchIndicator('');
@@ -1014,3 +1091,236 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Fonction pour effacer la recherche (accessible globalement)
 window.clearSearch = clearSearch;
+
+// ===== FONCTIONS DE DISCUSSION FAQ =====
+async function loadFAQDiscussion(faqId, faqItem) {
+    const discussionContainer = faqItem.querySelector('.faq-discussion');
+    if (!discussionContainer) return;
+    
+    // Vérifier si les commentaires sont déjà chargés
+    if (discussionContainer.hasAttribute('data-loaded')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`faq_comments.php?action=get&faq_id=${faqId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            displayFAQDiscussion(faqId, result.comments, discussionContainer);
+            discussionContainer.setAttribute('data-loaded', 'true');
+        } else {
+            console.error('Erreur lors du chargement des commentaires:', result.message);
+        }
+    } catch (error) {
+        console.error('Erreur lors du chargement des commentaires:', error);
+    }
+}
+
+function displayFAQDiscussion(faqId, comments, container) {
+    const isLoggedIn = container.dataset.loggedIn === 'true' || 
+                      document.querySelector('.nav-profile') !== null;
+    
+    container.innerHTML = `
+        <div class="discussion-header">
+            <h5><i class="fas fa-comments"></i> Discussion (${comments.length})</h5>
+        </div>
+        <div class="discussion-comments">
+            ${comments.length > 0 ? 
+                comments.map(comment => createCommentHTML(comment)).join('') : 
+                '<p class="no-comments">Aucun commentaire pour le moment. Soyez le premier à commenter !</p>'
+            }
+        </div>
+        ${isLoggedIn ? `
+            <div class="discussion-form">
+                <form class="comment-form" data-faq-id="${faqId}">
+                    <textarea 
+                        name="comment" 
+                        placeholder="Partagez votre expérience ou posez une question..." 
+                        rows="3" 
+                        required
+                        maxlength="2000"
+                    ></textarea>
+                    <div class="comment-form-footer">
+                        <span class="char-count">0 / 2000</span>
+                        <button type="submit" class="btn-comment">
+                            <i class="fas fa-paper-plane"></i> Publier
+                        </button>
+                    </div>
+                </form>
+            </div>
+        ` : `
+            <div class="discussion-login-prompt">
+                <p><i class="fas fa-info-circle"></i> Vous devez être <a href="login.php">connecté</a> pour participer à la discussion.</p>
+            </div>
+        `}
+    `;
+    
+    // Ajouter les event listeners pour le formulaire
+    const commentForm = container.querySelector('.comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', handleCommentSubmit);
+        
+        // Compteur de caractères
+        const textarea = commentForm.querySelector('textarea');
+        const charCount = commentForm.querySelector('.char-count');
+        if (textarea && charCount) {
+            textarea.addEventListener('input', function() {
+                charCount.textContent = `${this.value.length} / 2000`;
+            });
+        }
+    }
+}
+
+function createCommentHTML(comment) {
+    const date = new Date(comment.created_at);
+    const formattedDate = date.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    // Vérifier si l'utilisateur actuel peut supprimer ce commentaire
+    const currentUser = getCurrentUserId();
+    const canDelete = currentUser && (currentUser == comment.user_id || isAdmin());
+    
+    return `
+        <div class="comment-item" data-comment-id="${comment.id}">
+            <div class="comment-header">
+                <div class="comment-author">
+                    <i class="fas fa-user-circle"></i>
+                    <strong>${escapeHtml(comment.username)}</strong>
+                </div>
+                <div class="comment-meta">
+                    <span class="comment-date">${formattedDate}</span>
+                    ${canDelete ? `
+                        <button class="btn-delete-comment" data-comment-id="${comment.id}" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+            <div class="comment-content">
+                ${escapeHtml(comment.comment).replace(/\n/g, '<br>')}
+            </div>
+        </div>
+    `;
+}
+
+async function handleCommentSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const faqId = form.getAttribute('data-faq-id');
+    const textarea = form.querySelector('textarea');
+    const comment = textarea.value.trim();
+    
+    if (!comment) {
+        showNotification('Veuillez entrer un commentaire', 'error');
+        return;
+    }
+    
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publication...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('action', 'add');
+        formData.append('faq_id', faqId);
+        formData.append('comment', comment);
+        
+        const response = await fetch('faq_comments.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Réinitialiser le formulaire
+            textarea.value = '';
+            form.querySelector('.char-count').textContent = '0 / 2000';
+            
+            // Recharger les commentaires
+            const faqItem = form.closest('.faq-item');
+            const discussionContainer = faqItem.querySelector('.faq-discussion');
+            discussionContainer.removeAttribute('data-loaded');
+            await loadFAQDiscussion(faqId, faqItem);
+            
+            showNotification('Commentaire publié avec succès !', 'success');
+        } else {
+            showNotification(result.message || 'Erreur lors de la publication', 'error');
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+        showNotification('Erreur de connexion au serveur', 'error');
+    } finally {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalText;
+    }
+}
+
+// Gestion de la suppression de commentaires
+document.addEventListener('click', async function(e) {
+    if (e.target.closest('.btn-delete-comment')) {
+        const button = e.target.closest('.btn-delete-comment');
+        const commentId = button.getAttribute('data-comment-id');
+        
+        if (!confirm('Êtes-vous sûr de vouloir supprimer ce commentaire ?')) {
+            return;
+        }
+        
+        try {
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            formData.append('comment_id', commentId);
+            
+            const response = await fetch('faq_comments.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                const commentItem = button.closest('.comment-item');
+                commentItem.remove();
+                
+                // Mettre à jour le compteur
+                const faqItem = button.closest('.faq-item');
+                const discussionHeader = faqItem.querySelector('.discussion-header h5');
+                const commentsCount = faqItem.querySelectorAll('.comment-item').length;
+                if (discussionHeader) {
+                    discussionHeader.innerHTML = `<i class="fas fa-comments"></i> Discussion (${commentsCount})`;
+                }
+                
+                showNotification('Commentaire supprimé avec succès', 'success');
+            } else {
+                showNotification(result.message || 'Erreur lors de la suppression', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification('Erreur de connexion au serveur', 'error');
+        }
+    }
+});
+
+// Fonctions utilitaires pour les discussions
+function getCurrentUserId() {
+    // Récupérer l'ID utilisateur depuis la variable globale window
+    return window.currentUser ? window.currentUser.id : null;
+}
+
+function isAdmin() {
+    return window.currentUser && window.currentUser.role === 'admin';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
