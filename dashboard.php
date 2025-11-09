@@ -8,6 +8,18 @@ if (!isLoggedIn()) {
 }
 
 $user = getCurrentUser();
+// Rafraîchir le rôle depuis la base pour garantir sa justesse
+try {
+    $stmt = $pdo->prepare("SELECT role FROM users WHERE id = ?");
+    $stmt->execute([$user['id']]);
+    $row = $stmt->fetch();
+    if ($row && isset($row['role'])) {
+        $_SESSION['role'] = $row['role'];
+        $user['role'] = $row['role'];
+    }
+} catch (PDOException $e) {
+    error_log('Erreur récupération rôle sur dashboard: ' . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -39,6 +51,9 @@ $user = getCurrentUser();
                     echo '</a>';
                     echo '<div class="profile-dropdown">';
                     echo '<a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>';
+                    if (($_SESSION['role'] ?? 'user') === 'admin') {
+                        echo '<a href="administration.php"><i class="fas fa-tools"></i> Administration</a>';
+                    }
                     echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>';
                     echo '</div>';
                     echo '</div>';

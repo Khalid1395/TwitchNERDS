@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Inclure la configuration de base de données existante
-require_once 'configue/database.php';
+require_once 'configure/database.php';
 
 // Configuration pour auth.php (format attendu)
 $db_config = [
@@ -50,10 +50,10 @@ if (!isLoggedIn() && isset($_COOKIE['remember_token'])) {
     
     try {
         $stmt = $pdo->prepare("
-            SELECT u.id, u.username, u.email 
+            SELECT u.id, u.username, u.email, u.role 
             FROM users u 
             JOIN remember_tokens rt ON u.id = rt.user_id 
-            WHERE rt.token = ? AND rt.expires_at > NOW() AND u.is_active = 1
+            WHERE rt.token = ? AND rt.expires_at > NOW()
         ");
         $stmt->execute([$hashedToken]);
         $user = $stmt->fetch();
@@ -62,6 +62,7 @@ if (!isLoggedIn() && isset($_COOKIE['remember_token'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['role'] = $user['role'] ?? 'user';
             $_SESSION['logged_in'] = true;
             $_SESSION['login_time'] = time();
         }

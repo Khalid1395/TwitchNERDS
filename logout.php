@@ -8,7 +8,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Logger la déconnexion si l'utilisateur est connecté
     if ($userId) {
         try {
-            require_once 'configue/database.php';
+            // Ancienne inclusion (chemin erroné) — commentée
+            // require_once 'configue/database.php';
+            // Nouvelle approche: $pdo est déjà disponible via config.php (qui inclut configure/database.php)
             
             $stmt = $pdo->prepare("
                 INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent, created_at) 
@@ -28,7 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Supprimer le token "Se souvenir de moi" si il existe
     if (isset($_COOKIE['remember_token'])) {
         try {
-            require_once 'configue/database.php';
+            // Ancienne inclusion (chemin erroné) — commentée
+            // require_once 'configue/database.php';
+            // Nouvelle approche: $pdo est déjà disponible via config.php
             
             $stmt = $pdo->prepare("DELETE FROM remember_tokens WHERE token = ?");
             $stmt->execute([hash('sha256', $_COOKIE['remember_token'])]);
@@ -58,7 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Logger la déconnexion si l'utilisateur est connecté
     if ($userId) {
         try {
-            require_once 'configue/database.php';
+            // Ancienne inclusion (chemin erroné) — commentée
+            // require_once 'configue/database.php';
+            // Nouvelle approche: $pdo est déjà disponible via config.php
             
             $stmt = $pdo->prepare("
                 INSERT INTO activity_logs (user_id, action, description, ip_address, user_agent, created_at) 
@@ -78,7 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Supprimer le token "Se souvenir de moi" si il existe
     if (isset($_COOKIE['remember_token'])) {
         try {
-            require_once 'configue/database.php';
+            // Ancienne inclusion (chemin erroné) — commentée
+            // require_once 'configue/database.php';
+            // Nouvelle approche: $pdo est déjà disponible via config.php
             
             $stmt = $pdo->prepare("DELETE FROM remember_tokens WHERE token = ?");
             $stmt->execute([hash('sha256', $_COOKIE['remember_token'])]);

@@ -926,6 +926,7 @@ function checkUrlParams() {
     const action = urlParams.get('action');
     const message = urlParams.get('message');
     const type = urlParams.get('type');
+    const error = urlParams.get('error');
     
     if (action === 'register') {
         showRegisterForm();
@@ -933,6 +934,13 @@ function checkUrlParams() {
     
     if (message) {
         showNotification(decodeURIComponent(message), type || 'info');
+        // Nettoyer l'URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Afficher une notification dédiée si l’accès admin a été refusé
+    if (error === 'admin_required') {
+        showNotification('Vous devez être admin pour accéder à cette page.', 'warning');
         // Nettoyer l'URL
         window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -1195,6 +1203,9 @@ function createCommentHTML(comment) {
                 </div>
                 <div class="comment-meta">
                     <span class="comment-date">${formattedDate}</span>
+                    <button class="btn-report-comment" data-comment-id="${comment.id}" title="Signaler">
+                        <i class="fas fa-flag"></i>
+                    </button>
                     ${canDelete ? `
                         <button class="btn-delete-comment" data-comment-id="${comment.id}" title="Supprimer">
                             <i class="fas fa-trash"></i>
@@ -1301,6 +1312,30 @@ document.addEventListener('click', async function(e) {
                 showNotification('Commentaire supprimé avec succès', 'success');
             } else {
                 showNotification(result.message || 'Erreur lors de la suppression', 'error');
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            showNotification('Erreur de connexion au serveur', 'error');
+        }
+    }
+    // Signalement d'un commentaire
+    if (e.target.closest('.btn-report-comment')) {
+        const button = e.target.closest('.btn-report-comment');
+        const commentId = button.getAttribute('data-comment-id');
+        try {
+            const formData = new FormData();
+            formData.append('action', 'report');
+            formData.append('comment_id', commentId);
+            const response = await fetch('faq_comments.php', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Commentaire signalé. Merci pour votre retour.', 'success');
+                button.disabled = true;
+            } else {
+                showNotification(result.message || 'Impossible de signaler ce commentaire', 'error');
             }
         } catch (error) {
             console.error('Erreur:', error);

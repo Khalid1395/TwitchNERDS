@@ -5,14 +5,22 @@ require_once 'config.php';
 class AuthManager {
     private $pdo;
     
-    public function __construct($db_config) {
+    public function __construct() {
         try {
-            $dsn = "mysql:host={$db_config['host']};port={$db_config['port']};dbname={$db_config['dbname']};charset={$db_config['charset']}";
-            $this->pdo = new PDO($dsn, $db_config['username'], $db_config['password'], [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
-            ]);
+            // Ancienne connexion locale (via $db_config) — commentée pour centraliser via database.php
+            // $dsn = "mysql:host={$db_config['host']};port={$db_config['port']};dbname={$db_config['dbname']};charset={$db_config['charset']}";
+            // $this->pdo = new PDO($dsn, $db_config['username'], $db_config['password'], [
+            //     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            //     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            //     PDO::ATTR_EMULATE_PREPARES => false
+            // ]);
+
+            // Nouvelle connexion: utilise le PDO global exposé par configure/database.php
+            global $pdo;
+            $this->pdo = $pdo;
+            if (!$this->pdo) {
+                throw new PDOException('Connexion PDO non initialisée depuis configure/database.php');
+            }
         } catch (PDOException $e) {
             $this->sendJsonResponse(false, 'Erreur de connexion à la base de données: ' . $e->getMessage());
         }
@@ -226,7 +234,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
     
-    $auth = new AuthManager($db_config);
+    // Ancienne instanciation avec configuration locale — commentée pour centraliser via database.php
+    // $auth = new AuthManager($db_config);
+    
+    // Nouvelle instanciation: utilise le PDO fourni par configure/database.php
+    $auth = new AuthManager();
     $action = $_POST['action'] ?? '';
     
     switch ($action) {

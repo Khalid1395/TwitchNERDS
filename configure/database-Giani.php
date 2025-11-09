@@ -6,7 +6,7 @@
 
 // Configuration de la base de données
 $host = 'localhost';
-$port = '8888';
+$port = '80';
 $dbname = 'twitchnerd';
 $username = 'root';
 $password = 'root';

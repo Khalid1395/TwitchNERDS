@@ -34,6 +34,9 @@ require_once 'config.php';
                     echo '</a>';
                     echo '<div class="profile-dropdown">';
                     echo '<a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>';
+                    if (($_SESSION['role'] ?? 'user') === 'admin') {
+                        echo '<a href="administration.php"><i class="fas fa-tools"></i> Administration</a>';
+                    }
                     echo '<a href="logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>';
                     echo '</div>';
                     echo '</div>';
@@ -47,6 +50,12 @@ require_once 'config.php';
             </nav>
         </div>
     </header>
+
+    <!-- Notification globale (utilisée par script.js) -->
+    <div class="notification" id="notification">
+        <span class="notification-text"></span>
+        <button class="notification-close" onclick="hideNotification()">&times;</button>
+    </div>
 
     <main class="main">
         <section id="accueil" class="hero">

@@ -184,7 +184,61 @@ try {
                 'message' => 'Commentaire supprimé avec succès'
             ]);
             break;
-            
+        case 'report':
+            // Signaler un commentaire (anti-duplication par utilisateur)
+            if (!isLoggedIn()) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Vous devez être connecté pour signaler'
+                ]);
+                exit;
+            }
+
+            $comment_id = isset($_POST['comment_id']) ? (int)$_POST['comment_id'] : 0;
+            $user_id = $_SESSION['user_id'] ?? 0;
+            if (!$comment_id || !$user_id) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Paramètres invalides'
+                ]);
+                exit;
+            }
+
+            try {
+                // Vérifier duplication
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM comment_reports WHERE comment_id = ? AND user_id = ?");
+                $stmt->execute([$comment_id, $user_id]);
+                $exists = (int)$stmt->fetchColumn() > 0;
+                if ($exists) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Vous avez déjà signalé ce commentaire'
+                    ]);
+                    exit;
+                }
+
+                // Insérer signalement
+                $stmt = $pdo->prepare("INSERT INTO comment_reports (comment_id, user_id, created_at) VALUES (?, ?, NOW())");
+                $stmt->execute([$comment_id, $user_id]);
+
+                // Compter total des signalements
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM comment_reports WHERE comment_id = ?");
+                $stmt->execute([$comment_id]);
+                $count = (int)$stmt->fetchColumn();
+
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Signalement enregistré',
+                    'report_count' => $count
+                ]);
+            } catch (PDOException $e) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Erreur serveur: ' . $e->getMessage()
+                ]);
+            }
+            break;
+        
         default:
             echo json_encode([
                 'success' => false,
