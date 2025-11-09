@@ -7,7 +7,30 @@ require_once 'config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum Twitch - Connexion & Inscription</title>
+    <title>Connexion & Inscription - Twitch Nerd | Rejoignez la communauté</title>
+    <meta name="description" content="Connectez-vous ou créez votre compte sur Twitch Nerd pour accéder au forum de la communauté Twitch. Partagez vos expériences, posez des questions et participez aux discussions sur le streaming.">
+    <meta name="keywords" content="connexion twitch, inscription twitch, compte streamer, forum twitch, communauté streaming, créer compte">
+    <meta name="author" content="Twitch Nerd">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="French">
+    <link rel="canonical" href="https://wafd.agency/login.php">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wafd.agency/login.php">
+    <meta property="og:title" content="Connexion & Inscription - Twitch Nerd">
+    <meta property="og:description" content="Rejoignez la communauté Twitch Nerd. Créez votre compte pour accéder au forum et participer aux discussions sur le streaming.">
+    <meta property="og:image" content="https://wafd.agency/assets/upload/logo.png">
+    <meta property="og:locale" content="fr_FR">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:url" content="https://wafd.agency/login.php">
+    <meta name="twitter:title" content="Connexion & Inscription - Twitch Nerd">
+    <meta name="twitter:description" content="Rejoignez la communauté Twitch Nerd et accédez au forum de référence pour streamers.">
+    <meta name="twitter:image" content="https://wafd.agency/assets/upload/logo.png">
+    
+    <link rel="icon" type="image/png" href="assets/upload/logo.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -142,6 +165,11 @@ require_once 'config.php';
             <button class="notification-close" onclick="hideNotification()">&times;</button>
         </div>
     </div>
+
+    <!-- Bouton remonter en haut -->
+    <button id="scrollToTop" class="scroll-to-top" aria-label="Remonter en haut de la page" title="Remonter en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <script src="script.js"></script>
 </body>

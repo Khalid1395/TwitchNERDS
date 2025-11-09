@@ -501,10 +501,21 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Ajouter la classe 'scrolled' au header lors du défilement
     window.addEventListener('scroll', function() {
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+        
         if (window.scrollY > 50) {
             header.classList.add('scrolled');
         } else {
             header.classList.remove('scrolled');
+        }
+        
+        // Gestion du bouton remonter en haut
+        if (scrollToTopBtn) {
+            if (window.scrollY > 300) {
+                scrollToTopBtn.classList.add('show');
+            } else {
+                scrollToTopBtn.classList.remove('show');
+            }
         }
         
         // Mettre à jour le lien actif en fonction de la position de défilement
@@ -531,6 +542,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialiser le lien actif au chargement de la page
     updateActiveNavLink();
+    
+    // Ajouter l'event listener au bouton remonter en haut
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+    if (scrollToTopBtn) {
+        scrollToTopBtn.addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
 });
 
 // Fonction pour faire défiler vers une section

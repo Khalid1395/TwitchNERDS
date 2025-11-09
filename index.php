@@ -7,19 +7,46 @@ require_once 'config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twitch Nerd - Forum FAQ</title>
+    <title>Twitch Nerd - Forum FAQ | Communauté Twitch pour Streamers</title>
+    <meta name="description" content="Forum de référence pour tous les streamers et viewers Twitch. Trouvez des réponses à vos questions sur le streaming, OBS, la monétisation, l'équipement et créez une communauté engagée. Rejoignez Twitch Nerd !">
+    <meta name="keywords" content="twitch, streaming, streamer, obs, faq, forum, communauté twitch, monétisation twitch, équipement streaming, paramètres obs, partenaire twitch">
+    <meta name="author" content="Twitch Nerd">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="French">
+    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://wafd.agency/">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wafd.agency/">
+    <meta property="og:title" content="Twitch Nerd - Forum FAQ | Communauté Twitch pour Streamers">
+    <meta property="og:description" content="Forum de référence pour tous les streamers et viewers Twitch. Trouvez des réponses à vos questions sur le streaming, OBS, la monétisation et l'équipement.">
+    <meta property="og:image" content="https://wafd.agency/assets/upload/logo.png">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Twitch Nerd">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://wafd.agency/">
+    <meta name="twitter:title" content="Twitch Nerd - Forum FAQ | Communauté Twitch">
+    <meta name="twitter:description" content="Forum de référence pour streamers Twitch. FAQ complète sur le streaming, OBS, monétisation et équipement.">
+    <meta name="twitter:image" content="https://wafd.agency/assets/upload/logo.png">
+    
+    <link rel="icon" type="image/png" href="assets/upload/logo.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
+    <header class="header" role="banner">
         <div class="container">
             <div class="logo">
-                <img src="assets/upload/logo_b.png" alt="Twitch Nerd" class="logo-img logo-transparent">
-                <img src="assets/upload/logo.png" alt="Twitch Nerd" class="logo-img logo-scrolled">
+                <a href="#accueil" aria-label="Retour à l'accueil">
+                    <img src="assets/upload/logo_b.png" alt="Twitch Nerd - Logo" class="logo-img logo-transparent">
+                    <img src="assets/upload/logo.png" alt="Twitch Nerd - Logo" class="logo-img logo-scrolled">
+                </a>
             </div>
-            <nav class="nav">
-                <a href="#accueil" class="nav-link active">Accueil</a>
+            <nav class="nav" role="navigation" aria-label="Navigation principale">
+                <a href="#accueil" class="nav-link active" aria-current="page">Accueil</a>
                 <a href="#faq" class="nav-link">FAQ</a>
                 <?php
                 // Vérifier si l'utilisateur est connecté
@@ -57,8 +84,8 @@ require_once 'config.php';
         <button class="notification-close" onclick="hideNotification()">&times;</button>
     </div>
 
-    <main class="main">
-        <section id="accueil" class="hero">
+    <main class="main" role="main">
+        <section id="accueil" class="hero" aria-labelledby="hero-title">
             <div class="hero-background">
                 <div class="hero-particles"></div>
                 <div class="hero-gradient"></div>
@@ -69,7 +96,7 @@ require_once 'config.php';
                         <i class="fab fa-twitch"></i>
                         <span>Communauté Twitch</span>
                     </div>
-                    <h1 class="hero-title">
+                    <h1 class="hero-title" id="hero-title">
                         <span class="title-line">Bienvenue sur</span>
                         <span class="title-highlight">Twitch Nerd</span>
                     </h1>
@@ -138,29 +165,31 @@ require_once 'config.php';
             </div>
         </section>
 
-        <section id="recherche" class="search-section">
+        <section id="recherche" class="search-section" aria-labelledby="search-title">
             <div class="container">
                 <div class="search-container">
-                    <h3>Rechercher une question</h3>
-                    <div class="search-box">
-                        <input type="text" id="searchInput" placeholder="Tapez votre question ici...">
-                        <button id="searchBtn"><i class="fas fa-search"></i></button>
-            </div>
+                    <h3 id="search-title">Rechercher une question</h3>
+                    <div class="search-box" role="search">
+                        <label for="searchInput" class="sr-only">Rechercher une question</label>
+                        <input type="text" id="searchInput" placeholder="Tapez votre question ici..." aria-label="Champ de recherche">
+                        <button id="searchBtn" aria-label="Lancer la recherche"><i class="fas fa-search" aria-hidden="true"></i></button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section id="faq" class="faq-section">
+        <section id="faq" class="faq-section" aria-labelledby="faq-title">
             <div class="container">
-                <div class="faq-categories">
-                    <button class="category-btn active" data-category="all">Toutes</button>
-                    <button class="category-btn" data-category="streaming">Streaming</button>
-                    <button class="category-btn" data-category="technical">Technique</button>
-                    <button class="category-btn" data-category="monetisation">Monétisation</button>
-                    <button class="category-btn" data-category="community">Communauté</button>
+                <h3 id="faq-title">Questions Fréquemment Posées</h3>
+                <div class="faq-categories" role="tablist" aria-label="Filtrer les questions par catégorie">
+                    <button class="category-btn active" data-category="all" role="tab" aria-selected="true" aria-controls="faq-container">Toutes</button>
+                    <button class="category-btn" data-category="streaming" role="tab" aria-selected="false" aria-controls="faq-container">Streaming</button>
+                    <button class="category-btn" data-category="technical" role="tab" aria-selected="false" aria-controls="faq-container">Technique</button>
+                    <button class="category-btn" data-category="monetisation" role="tab" aria-selected="false" aria-controls="faq-container">Monétisation</button>
+                    <button class="category-btn" data-category="community" role="tab" aria-selected="false" aria-controls="faq-container">Communauté</button>
                 </div>
 
-                <div class="faq-container">
+                <div class="faq-container" id="faq-container" role="tabpanel">
                     <div class="faq-loading">
                         <i class="fas fa-spinner fa-spin"></i>
                         <p>Chargement des questions...</p>
@@ -170,7 +199,7 @@ require_once 'config.php';
         </section>
     </main>
 
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-section">
@@ -196,6 +225,11 @@ require_once 'config.php';
             </div>
         </div>
     </footer>
+
+    <!-- Bouton remonter en haut -->
+    <button id="scrollToTop" class="scroll-to-top" aria-label="Remonter en haut de la page" title="Remonter en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <script src="script.js"></script>
 </body>

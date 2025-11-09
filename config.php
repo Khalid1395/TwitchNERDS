@@ -8,11 +8,11 @@ require_once 'configure/database.php';
 
 // Configuration pour auth.php (format attendu)
 $db_config = [
-    'host' => 'localhost',
-    'port' => '8888',
-    'dbname' => 'twitchnerd',
-    'username' => 'root',
-    'password' => 'root',
+    'host' => 'db5018973790.hosting-data.io',
+    'port' => '3306',
+    'dbname' => 'dbs14945231',
+    'username' => 'dbu1451358',
+    'password' => 'NevoProjet@13013',
     'charset' => 'utf8mb4'
 ];
 

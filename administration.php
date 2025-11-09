@@ -27,7 +27,27 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twitch Nerd - Administration</title>
+    <title>Administration - Twitch Nerd | Panel d'administration</title>
+    <meta name="description" content="Panel d'administration Twitch Nerd. Gérez les FAQ, les commentaires, les membres et le contenu du forum depuis l'interface d'administration.">
+    <meta name="keywords" content="administration twitch, panel admin, gestion forum, modération, administration site">
+    <meta name="author" content="Twitch Nerd">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="language" content="French">
+    <link rel="canonical" href="https://wafd.agency/administration.php">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wafd.agency/administration.php">
+    <meta property="og:title" content="Administration - Twitch Nerd">
+    <meta property="og:description" content="Panel d'administration du forum Twitch Nerd.">
+    <meta property="og:image" content="https://wafd.agency/assets/upload/logo.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Administration - Twitch Nerd">
+    <meta name="twitter:description" content="Panel d'administration">
+    
+    <link rel="icon" type="image/png" href="assets/upload/logo.png">
     <link rel="stylesheet" href="styles-administration.css">
     <link rel="stylesheet" href="styles-administration-dashboard.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -536,6 +556,12 @@ try {
             </div>
         </div>
     </footer>
+    
+    <!-- Bouton remonter en haut -->
+    <button id="scrollToTop" class="scroll-to-top" aria-label="Remonter en haut de la page" title="Remonter en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
     <script src="script-administration.js"></script>
 </body>
 </html>

@@ -26,7 +26,27 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Forum Twitch</title>
+    <title>Tableau de bord - Twitch Nerd | Mon espace membre</title>
+    <meta name="description" content="Accédez à votre tableau de bord Twitch Nerd. Gérez votre profil, consultez vos activités et participez activement à la communauté des streamers.">
+    <meta name="keywords" content="dashboard twitch, profil streamer, espace membre, compte utilisateur, tableau de bord">
+    <meta name="author" content="Twitch Nerd">
+    <meta name="robots" content="noindex, follow">
+    <meta name="language" content="French">
+    <link rel="canonical" href="https://wafd.agency/dashboard.php">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wafd.agency/dashboard.php">
+    <meta property="og:title" content="Tableau de bord - Twitch Nerd">
+    <meta property="og:description" content="Gérez votre profil et participez à la communauté Twitch Nerd depuis votre tableau de bord.">
+    <meta property="og:image" content="https://wafd.agency/assets/upload/logo.png">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Tableau de bord - Twitch Nerd">
+    <meta name="twitter:description" content="Votre espace membre sur Twitch Nerd.">
+    
+    <link rel="icon" type="image/png" href="assets/upload/logo.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -138,6 +158,11 @@ try {
             </div>
         </div>
     </div>
+
+    <!-- Bouton remonter en haut -->
+    <button id="scrollToTop" class="scroll-to-top" aria-label="Remonter en haut de la page" title="Remonter en haut">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <script src="script.js"></script>
 </body>
