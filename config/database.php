@@ -11,7 +11,11 @@ try {
     // Activer les erreurs PDO en mode Exception
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
+<<<<<<< Updated upstream
     //echo "✅ Connexion réussie à la base '$dbname'";
+=======
+    echo "✅ Connexion réussie à la base '$dbname'";
+>>>>>>> Stashed changes
 } catch (PDOException $e) {
     echo "❌ Erreur de connexion : " . $e->getMessage();
 }
